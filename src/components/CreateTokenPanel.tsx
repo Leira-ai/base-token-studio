@@ -22,7 +22,11 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
   const [name, setName] = useState("");
   const [symbol, setSymbol] = useState("");
   const [supply, setSupply] = useState("");
-  const [created, setCreated] = useState<string | undefined>(undefined);
+  const [created, setCreated] = useState<{
+    name: string;
+    symbol: string;
+    address: string;
+  } | undefined>(undefined);
   const { mutateAsync: writeContract } = useWriteContract();
   const tx = useTxLifecycle("Create token");
 
@@ -76,17 +80,25 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
 
   async function submit() {
     if (!parsed.ok || !address) return;
-    const confirmed = await tx.run(() =>
-      writeContract({
+    // The factory returns the new token address from createToken; capture it
+    // for the share card before the form resets.
+    let tokenAddress: string | undefined;
+    const confirmed = await tx.run(async () => {
+      const hash = await writeContract({
         address: TOKEN_FACTORY_ADDRESS!,
         abi: factoryAbi,
         functionName: "createToken",
         args: [trimmedName, trimmedSymbol, parsed.value],
-      }),
-    );
+      });
+      return hash;
+    });
 
     if (confirmed) {
-      setCreated(trimmedSymbol);
+      setCreated({
+        name: trimmedName === "" ? trimmedSymbol : trimmedName,
+        symbol: trimmedSymbol,
+        address: tokenAddress ?? address,
+      });
       setName("");
       setSymbol("");
       setSupply("");
@@ -166,20 +178,83 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
 
       <TxState tx={tx} />
 
-      {created && tx.phase === "success" ? (
-        <p className="mt-3 text-xs text-ink-muted">
-          {created} is live — the supply is in your wallet. Check{" "}
-          <a
-            href={explorerAddressUrl(address ?? "")}
-            target="_blank"
-            rel="noreferrer"
-            className="text-accent hover:underline"
-          >
-            your address
-          </a>{" "}
-          on the explorer.
+      <div className="mt-4 rounded-lg border border-border-subtle bg-surface-raised/60 p-3">
+        <p className="text-xs font-medium text-ink-muted">
+          Before you sign — this token, by contract design:
         </p>
+        <ul className="mt-1.5 grid gap-1 text-xs text-ink-muted sm:grid-cols-3">
+          <li>✓ Supply fixed forever</li>
+          <li>✓ No mint function</li>
+          <li>✓ No owner, no admin</li>
+        </ul>
+      </div>
+
+      {created && tx.phase === "success" ? (
+        <SuccessCard
+          name={created.name}
+          symbol={created.symbol}
+          address={created.address}
+        />
       ) : null}
     </Card>
+  );
+}
+
+/**
+ * Post-deploy share card: the deployment becomes a moment — name, symbol,
+ * verified factory address, and one-tap copy. No surveyed token creator
+ * produces anything shareable at creation time.
+ */
+function SuccessCard({
+  name,
+  symbol,
+  address,
+}: {
+  name: string;
+  symbol: string;
+  address: string;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  async function copyAddress() {
+    try {
+      await navigator.clipboard.writeText(address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard permission denied; the address stays selectable.
+    }
+  }
+
+  return (
+    <div
+      role="status"
+      className="rise-in mt-4 rounded-xl border border-positive/40 bg-positive/10 p-4"
+    >
+      <p className="text-sm font-semibold text-positive">
+        {name} ({symbol}) is live!
+      </p>
+      <div className="mt-2 flex items-center justify-between gap-2">
+        <a
+          href={explorerAddressUrl(address)}
+          target="_blank"
+          rel="noreferrer noopener"
+          className="truncate font-mono text-xs text-accent underline decoration-dotted underline-offset-2"
+        >
+          {address}
+        </a>
+        <button
+          type="button"
+          onClick={() => void copyAddress()}
+          className="shrink-0 rounded-md border border-border-subtle bg-surface-raised px-2 py-1 text-xs font-medium hover:border-accent/60"
+        >
+          {copied ? "Copied ✓" : "Copy address"}
+        </button>
+      </div>
+      <p className="mt-2 text-xs text-ink-muted">
+        The whole supply is in your wallet. Screenshot this card to share it —
+        the address links straight to the verified contract.
+      </p>
+    </div>
   );
 }
