@@ -2,6 +2,7 @@
 
 import { useAccount } from "wagmi";
 import { targetChain } from "@/lib/chain";
+import { TOKEN_FACTORY_ADDRESS } from "@/lib/factory";
 import { useBalances } from "@/hooks/useBalances";
 import { ActivityLog } from "@/components/ActivityLog";
 import { BalancePanel } from "@/components/BalancePanel";
@@ -11,6 +12,12 @@ import { NetworkGuard } from "@/components/NetworkGuard";
 import { TransferPanel } from "@/components/TransferPanel";
 import { WrapPanel } from "@/components/WrapPanel";
 
+/**
+ * Panels render even before a wallet connects — actions disable themselves and
+ * the connect control lives in the navbar. Every card shows a hint line about
+ * what connecting unlocks, so the landing view explains the app instead of
+ * gating it behind a single empty state.
+ */
 export default function Home() {
   const { isConnected } = useAccount();
   const { eth, weth, refetch } = useBalances();
@@ -33,10 +40,11 @@ export default function Home() {
       <div className="space-y-4">
         <NetworkGuard />
 
+        <CreateTokenPanel onConfirmed={refetch} />
+
         {isConnected ? (
           <>
             <BalancePanel eth={eth} weth={weth} onRefresh={refetch} />
-            <CreateTokenPanel onConfirmed={refetch} />
             <div className="grid gap-4 md:grid-cols-2">
               <WrapPanel eth={eth} weth={weth} onConfirmed={refetch} />
               <TransferPanel weth={weth} onConfirmed={refetch} />
@@ -44,15 +52,15 @@ export default function Home() {
             <ActivityLog />
           </>
         ) : (
-          <div className="rounded-xl border border-border-subtle bg-surface p-8 text-center">
-            <p className="text-sm text-ink-muted">
-              Connect a wallet to read balances and send transactions.
-            </p>
-            <p className="mt-2 text-xs text-ink-muted">
-              This app only targets {targetChain.name}, so no real funds are at
-              risk. Once connected you can create a token, wrap ETH, and send
-              transfers.
-            </p>
+          <div className="grid gap-4 md:grid-cols-2">
+            <CardShell
+              title="Balances"
+              hint="Connect a wallet to read your ETH and WETH balances."
+            />
+            <CardShell
+              title="Wrap and send"
+              hint="Connect a wallet to wrap ETH ↔ WETH and send ERC-20 transfers."
+            />
           </div>
         )}
       </div>
@@ -62,5 +70,14 @@ export default function Home() {
         never holds keys.
       </footer>
     </main>
+  );
+}
+
+function CardShell({ title, hint }: { title: string; hint: string }) {
+  return (
+    <div className="rounded-xl border border-border-subtle bg-surface p-6">
+      <h2 className="text-sm font-semibold">{title}</h2>
+      <p className="mt-2 text-xs text-ink-muted">{hint}</p>
+    </div>
   );
 }

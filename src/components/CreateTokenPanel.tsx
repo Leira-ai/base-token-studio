@@ -98,7 +98,7 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
           value={name}
           onChange={setName}
           placeholder="Studio Token"
-          disabled={busy}
+          disabled={!isConnected || busy}
         />
 
         <Field
@@ -108,8 +108,9 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
           onChange={(next) => setSymbol(next.toUpperCase())}
           placeholder="STUDIO"
           mono
-          disabled={busy}
+          disabled={!isConnected || busy}
           error={symbolError}
+          hint={isConnected ? undefined : "Connect a wallet to deploy"}
         />
 
         <Field
@@ -120,7 +121,7 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
           placeholder="1000000"
           inputMode="decimal"
           mono
-          disabled={busy}
+          disabled={!isConnected || busy}
           error={supplyError}
         />
       </div>
@@ -131,7 +132,7 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
         onClick={() => void submit()}
       >
         {busy ? <Spinner label="Transaction in progress" /> : null}
-        Deploy token
+        {isConnected ? "Deploy token" : "Connect a wallet to deploy"}
       </Button>
 
       <TxState tx={tx} />
