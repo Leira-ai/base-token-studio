@@ -23,7 +23,10 @@ export default function Home() {
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
-      <header className="rise-in mb-8 flex flex-wrap items-start justify-between gap-4">
+      {/* relative z-10 keeps the wallet dropdown above the cards below: the
+          header's rise-in animation leaves a persistent stacking context, so a
+          plain z-index on the dropdown alone loses to later siblings. */}
+      <header className="rise-in relative z-10 mb-8 flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-start gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element -- tiny inline logo, no optimization pipeline needed */}
           <img
