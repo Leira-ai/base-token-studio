@@ -10,6 +10,7 @@ import { CreateTokenPanel } from "@/components/CreateTokenPanel";
 import { NetworkGuard } from "@/components/NetworkGuard";
 import { TransferPanel } from "@/components/TransferPanel";
 import { WrapPanel } from "@/components/WrapPanel";
+import { ToastStack } from "@/lib/toasts";
 
 /**
  * Panels render even before a wallet connects — actions disable themselves and
@@ -81,6 +82,8 @@ export default function Home() {
         Testnet only. Every transaction is signed in your own wallet; this app
         never holds keys.
       </footer>
+
+      <ToastStack />
     </main>
   );
 }
