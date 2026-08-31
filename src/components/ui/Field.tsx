@@ -1,5 +1,10 @@
 import type { ReactNode } from "react";
 
+/**
+ * In-context education: a one-line "why" shown under the label. Token-creator
+ * competitors ask for numbers without explaining them; these tooltips teach
+ * decimals, gas, and supply at the moment of confusion.
+ */
 export function Field({
   id,
   label,
@@ -8,6 +13,7 @@ export function Field({
   placeholder,
   error,
   hint,
+  learn,
   trailing,
   disabled,
   inputMode = "text",
@@ -21,6 +27,8 @@ export function Field({
   /** Shown only after the user has entered something, to avoid scolding empty forms. */
   error?: string;
   hint?: ReactNode;
+  /** Evergreen explainer rendered as a title tooltip on the label. */
+  learn?: string;
   trailing?: ReactNode;
   disabled?: boolean;
   inputMode?: "text" | "decimal";
@@ -31,8 +39,20 @@ export function Field({
   return (
     <div>
       <div className="mb-1.5 flex items-baseline justify-between gap-2">
-        <label htmlFor={id} className="text-xs font-medium text-ink-muted">
+        <label
+          htmlFor={id}
+          className="text-xs font-medium text-ink-muted"
+          title={learn}
+        >
           {label}
+          {learn ? (
+            <span
+              aria-hidden
+              className="ml-1.5 cursor-help rounded-full border border-border-subtle px-1.5 text-[10px] leading-4 text-ink-muted"
+            >
+              ?
+            </span>
+          ) : null}
         </label>
         {hint && !error ? (
           <span id={`${id}-hint`} className="text-xs text-ink-muted">

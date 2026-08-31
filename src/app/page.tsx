@@ -14,6 +14,7 @@ import { WrapPanel } from "@/components/WrapPanel";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { TrustPanel } from "@/components/TrustPanel";
 import { ToastStack } from "@/lib/toasts";
+import Link from "next/link";
 
 /**
  * Panels render even before a wallet connects — actions disable themselves and
@@ -91,9 +92,17 @@ export default function Home() {
         )}
       </div>
 
-      <footer className="mt-10 text-xs text-ink-muted">
-        Testnet only. Every transaction is signed in your own wallet; this app
-        never holds keys.
+      <footer className="mt-10 flex flex-wrap items-center justify-between gap-3 text-xs text-ink-muted">
+        <span>
+          Testnet only. Every transaction is signed in your own wallet; this app
+          never holds keys.
+        </span>
+        <Link
+          href="/learn"
+          className="text-accent underline decoration-dotted underline-offset-2"
+        >
+          New to tokens? Read the 60-second FAQ →
+        </Link>
       </footer>
 
       <ToastStack />

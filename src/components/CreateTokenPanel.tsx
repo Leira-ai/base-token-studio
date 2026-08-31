@@ -134,6 +134,7 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
           value={name}
           onChange={setName}
           placeholder="Studio Token"
+          learn="The token's display name in wallets and explorers. Cosmetic — choose freely."
           disabled={!isConnected || busy}
         />
 
@@ -144,6 +145,7 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
           onChange={(next) => setSymbol(next.toUpperCase())}
           placeholder="STUDIO"
           mono
+          learn="The short ticker (like ETH or USDC). Letters and digits, 11 characters max."
           disabled={!isConnected || busy}
           error={symbolError}
           hint={isConnected ? undefined : "Connect a wallet to deploy"}
@@ -157,6 +159,7 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
           placeholder="1000000"
           inputMode="decimal"
           mono
+          learn="ERC-20 stores amounts in base units: on-chain, 1 token = 1 followed by 18 zeros. The contract multiplies for you — type the human number."
           disabled={!isConnected || busy}
           error={supplyError}
           hint={supplyPreview}
@@ -175,6 +178,10 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
       {gasEstimate ? (
         <p className="mt-2 text-center text-xs text-ink-muted">{gasEstimate}</p>
       ) : null}
+      <p className="mt-2 text-center text-xs text-ink-muted">
+        Platform fee: <strong className="text-positive">0 ETH</strong>, always.
+        You only pay the network fee above.
+      </p>
 
       <TxState tx={tx} />
 
