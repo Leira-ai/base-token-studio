@@ -36,17 +36,20 @@ export default function Home() {
       {/* relative z-10 keeps the wallet dropdown above the cards below: the
           header's rise-in animation leaves a persistent stacking context, so a
           plain z-index on the dropdown alone loses to later siblings. */}
-      <header className="rise-in relative z-10 mb-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-        <div className="flex items-start gap-3">
+      {/* Grid, not flex-wrap: the controls column is pinned top-right and the
+          tagline wraps inside its own minmax(0,1fr) column, so switching EN/ID
+          (different tagline lengths) never reflows the navbar. */}
+      <header className="rise-in relative z-10 mb-8 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
+        <div className="flex min-w-0 items-start gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element -- tiny inline logo, no optimization pipeline needed */}
           <img
             src="/logo.svg"
             alt=""
             width={40}
             height={40}
-            className="mt-0.5 drop-shadow-[0_0_14px_rgba(79,124,255,0.45)]"
+            className="mt-0.5 shrink-0 drop-shadow-[0_0_14px_rgba(79,124,255,0.45)]"
           />
-          <div>
+          <div className="min-w-0">
             <h1 className="text-xl font-semibold tracking-tight">
               Base Token Studio
             </h1>
@@ -55,9 +58,7 @@ export default function Home() {
             </p>
           </div>
         </div>
-        {/* Anchored top-right on desktop (items-start + no wrap of its own);
-            the row keeps a fixed height so toggling EN/ID never reflows it. */}
-        <div className="flex items-center gap-2 sm:h-10">
+        <div className="flex items-center gap-2">
           <LocaleToggle />
           <ThemeToggle />
           <ConnectBar />
