@@ -36,7 +36,7 @@ export default function Home() {
       {/* relative z-10 keeps the wallet dropdown above the cards below: the
           header's rise-in animation leaves a persistent stacking context, so a
           plain z-index on the dropdown alone loses to later siblings. */}
-      <header className="rise-in relative z-10 mb-8 flex flex-wrap items-start justify-between gap-4">
+      <header className="rise-in relative z-10 mb-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element -- tiny inline logo, no optimization pipeline needed */}
           <img
@@ -55,7 +55,9 @@ export default function Home() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        {/* Anchored top-right on desktop (items-start + no wrap of its own);
+            the row keeps a fixed height so toggling EN/ID never reflows it. */}
+        <div className="flex items-center gap-2 sm:h-10">
           <LocaleToggle />
           <ThemeToggle />
           <ConnectBar />
