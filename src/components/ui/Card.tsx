@@ -12,7 +12,7 @@ export function Card({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-xl border border-border-subtle bg-surface p-5">
+    <section className="rise-in rounded-xl border border-border-subtle bg-surface p-5 transition-colors hover:border-border-hover">
       <header className="mb-4 flex items-start justify-between gap-3">
         <div>
           <h2 className="text-sm font-semibold tracking-tight">{title}</h2>

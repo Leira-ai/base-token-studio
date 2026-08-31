@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { formatBalance, parseAmount, truncateHex } from "./format.ts";
+import { formatBalance, groupDigits, parseAmount, truncateHex } from "./format.ts";
 
 test("parseAmount rejects input that would otherwise reach the wallet", () => {
   assert.equal(parseAmount("", 18).ok, false);
@@ -46,4 +46,10 @@ test("truncateHex leaves short values alone", () => {
   const hash = `0x${"a".repeat(64)}`;
   assert.equal(truncateHex(hash), "0xaaaa…aaaa");
   assert.equal(truncateHex("0x1234"), "0x1234");
+});
+
+test("groupDigits adds thousands separators", () => {
+  assert.equal(groupDigits("676767"), "676,767");
+  assert.equal(groupDigits("1000000"), "1,000,000");
+  assert.equal(groupDigits("12"), "12");
 });

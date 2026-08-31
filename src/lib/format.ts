@@ -60,3 +60,8 @@ export function truncateHex(value: string, lead = 6, tail = 4): string {
   if (value.length <= lead + tail + 2) return value;
   return `${value.slice(0, lead)}…${value.slice(-tail)}`;
 }
+
+/** "676767" → "676,767" — digit grouping for supply previews. */
+export function groupDigits(digits: string): string {
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}

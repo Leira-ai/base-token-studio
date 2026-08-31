@@ -2,7 +2,6 @@
 
 import { useAccount } from "wagmi";
 import { targetChain } from "@/lib/chain";
-import { TOKEN_FACTORY_ADDRESS } from "@/lib/factory";
 import { useBalances } from "@/hooks/useBalances";
 import { ActivityLog } from "@/components/ActivityLog";
 import { BalancePanel } from "@/components/BalancePanel";
@@ -24,15 +23,25 @@ export default function Home() {
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
-      <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight">
-            Base Token Studio
-          </h1>
-          <p className="mt-1 text-sm text-ink-muted">
-            Create tokens, wrap ETH, and send ERC-20 transfers on{" "}
-            {targetChain.name}.
-          </p>
+      <header className="rise-in mb-8 flex flex-wrap items-start justify-between gap-4">
+        <div className="flex items-start gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element -- tiny inline logo, no optimization pipeline needed */}
+          <img
+            src="/logo.svg"
+            alt=""
+            width={40}
+            height={40}
+            className="mt-0.5 drop-shadow-[0_0_14px_rgba(79,124,255,0.45)]"
+          />
+          <div>
+            <h1 className="text-xl font-semibold tracking-tight">
+              Base Token Studio
+            </h1>
+            <p className="mt-1 text-sm text-ink-muted">
+              Create tokens, wrap ETH, and send ERC-20 transfers on{" "}
+              {targetChain.name}.
+            </p>
+          </div>
         </div>
         <ConnectBar />
       </header>
@@ -75,7 +84,7 @@ export default function Home() {
 
 function CardShell({ title, hint }: { title: string; hint: string }) {
   return (
-    <div className="rounded-xl border border-border-subtle bg-surface p-6">
+    <div className="rise-in rise-in-2 rounded-xl border border-border-subtle bg-surface p-6 transition-colors hover:border-border-hover">
       <h2 className="text-sm font-semibold">{title}</h2>
       <p className="mt-2 text-xs text-ink-muted">{hint}</p>
     </div>

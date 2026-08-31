@@ -5,6 +5,7 @@
   --color-surface: #10131a;
   --color-surface-raised: #171b24;
   --color-border-subtle: #232936;
+  --color-border-hover: #3a4556;
   --color-ink: #e8ecf4;
   --color-ink-muted: #949db2;
   --color-accent: #4f7cff;
@@ -28,11 +29,58 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/*
+ * Ambient background: two fixed gradient glows plus a faint grid. Pure CSS so
+ * there is no image payload; the canvas color underneath keeps contrast safe.
+ */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(42rem 28rem at 12% -8%, rgba(79, 124, 255, 0.16), transparent 62%),
+    radial-gradient(36rem 26rem at 96% 4%, rgba(124, 92, 255, 0.12), transparent 60%),
+    radial-gradient(30rem 22rem at 50% 118%, rgba(63, 202, 138, 0.07), transparent 60%);
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(232, 236, 244, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(232, 236, 244, 0.028) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(75rem 46rem at 50% 0%, black 30%, transparent 78%);
+}
+
 /* Visible focus is kept for keyboard users only; pointer clicks stay clean. */
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
+
+/* Entrance animation for cards; guarded by the reduced-motion block below. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rise-in {
+  animation: rise-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.rise-in-1 { animation-delay: 0.05s; }
+.rise-in-2 { animation-delay: 0.12s; }
+.rise-in-3 { animation-delay: 0.19s; }
 
 @media (prefers-reduced-motion: reduce) {
   *,

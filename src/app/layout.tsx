@@ -9,7 +9,8 @@ import "@/app/globals.css";
 export const metadata: Metadata = {
   title: "Base Token Studio",
   description:
-    "Inspect balances, wrap and unwrap WETH, and send ERC-20 tokens on Base Sepolia.",
+    "Create fixed-supply ERC-20 tokens, wrap and unwrap WETH, and send transfers on Base Sepolia.",
+  icons: { icon: "/favicon.svg" },
 };
 
 export default async function RootLayout({

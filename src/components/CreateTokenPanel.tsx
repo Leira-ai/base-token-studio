@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useAccount, useWriteContract } from "wagmi";
 import { TOKEN_FACTORY_ADDRESS, factoryAbi, parseSupply } from "@/lib/factory";
 import { targetChain, explorerAddressUrl } from "@/lib/chain";
+import { groupDigits } from "@/lib/format";
 import { useTxLifecycle } from "@/hooks/useTxLifecycle";
 import { Button, Spinner } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -39,6 +40,13 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
 
   const parsed = parseSupply(supply);
   const supplyError = supply.trim() === "" ? undefined : !parsed.ok ? parsed.reason : undefined;
+  // "676767" mints 676,767 * 10^18 base units — show the explorer-sized number
+  // so the 18-decimal scaling is never a surprise.
+  const supplyDigits = supply.trim().replace(/[^0-9]/g, "");
+  const supplyPreview =
+    supplyDigits === "" || !parsed.ok
+      ? undefined
+      : `${groupDigits(supplyDigits)} followed by 18 zeros on-chain`;
 
   const busy = tx.phase === "signing" || tx.phase === "pending";
   const canSubmit =
@@ -123,6 +131,7 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
           mono
           disabled={!isConnected || busy}
           error={supplyError}
+          hint={supplyPreview}
         />
       </div>
 
