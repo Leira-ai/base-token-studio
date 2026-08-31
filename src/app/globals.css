@@ -18,8 +18,31 @@
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 
+/*
+ * Light theme overrides. Same variables, different values — every component
+ * keeps reading semantic names, so the swap needs no class changes.
+ */
+[data-theme="light"] {
+  --color-canvas: #f4f6fb;
+  --color-surface: #ffffff;
+  --color-surface-raised: #eef1f8;
+  --color-border-subtle: #d9dfe9;
+  --color-border-hover: #9fb0cc;
+  --color-ink: #171c28;
+  --color-ink-muted: #5b6779;
+  --color-accent: #3563e9;
+  --color-accent-ink: #ffffff;
+  --color-positive: #1d9e63;
+  --color-negative: #d64545;
+  --color-caution: #b07818;
+}
+
 html {
   color-scheme: dark;
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
 }
 
 body {
@@ -32,6 +55,7 @@ body {
 /*
  * Ambient background: two fixed gradient glows plus a faint grid. Pure CSS so
  * there is no image payload; the canvas color underneath keeps contrast safe.
+ * Light theme dims the glows and the grid further via CSS variables.
  */
 body::before {
   content: "";
@@ -44,6 +68,13 @@ body::before {
     radial-gradient(30rem 22rem at 50% 118%, rgba(63, 202, 138, 0.07), transparent 60%);
 }
 
+[data-theme="light"] body::before {
+  background:
+    radial-gradient(42rem 28rem at 12% -8%, rgba(53, 99, 233, 0.08), transparent 62%),
+    radial-gradient(36rem 26rem at 96% 4%, rgba(124, 92, 255, 0.06), transparent 60%),
+    radial-gradient(30rem 22rem at 50% 118%, rgba(29, 158, 99, 0.05), transparent 60%);
+}
+
 body::after {
   content: "";
   position: fixed;
@@ -54,6 +85,12 @@ body::after {
     linear-gradient(90deg, rgba(232, 236, 244, 0.028) 1px, transparent 1px);
   background-size: 44px 44px;
   mask-image: radial-gradient(75rem 46rem at 50% 0%, black 30%, transparent 78%);
+}
+
+[data-theme="light"] body::after {
+  background-image:
+    linear-gradient(rgba(23, 28, 40, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(23, 28, 40, 0.035) 1px, transparent 1px);
 }
 
 /* Visible focus is kept for keyboard users only; pointer clicks stay clean.

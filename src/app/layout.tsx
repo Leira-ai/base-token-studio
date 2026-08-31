@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { headers } from "next/headers";
 import { cookieToInitialState } from "wagmi";
 import { getConfig } from "@/lib/wagmi";
+import { themeInitScript } from "@/lib/useTheme";
 import { Providers } from "@/app/providers";
 import "@/app/globals.css";
 
@@ -26,7 +27,10 @@ export default async function RootLayout({
   );
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body>
         <Providers initialState={initialState}>{children}</Providers>
       </body>

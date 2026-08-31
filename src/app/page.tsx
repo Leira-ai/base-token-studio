@@ -11,6 +11,8 @@ import { MyTokens } from "@/components/MyTokens";
 import { NetworkGuard } from "@/components/NetworkGuard";
 import { TransferPanel } from "@/components/TransferPanel";
 import { WrapPanel } from "@/components/WrapPanel";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { TrustPanel } from "@/components/TrustPanel";
 import { ToastStack } from "@/lib/toasts";
 
 /**
@@ -48,7 +50,10 @@ export default function Home() {
             </p>
           </div>
         </div>
-        <ConnectBar />
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <ConnectBar />
+        </div>
       </header>
 
       <div className="space-y-4">
@@ -65,6 +70,7 @@ export default function Home() {
               <TransferPanel weth={weth} onConfirmed={refetch} />
             </div>
             <ActivityLog />
+            <TrustPanel />
           </>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
