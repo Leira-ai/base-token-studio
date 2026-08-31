@@ -23,7 +23,7 @@ export function Providers({
           queries: {
             staleTime: 10_000,
             retry: 1,
-            refetchOnWindowFocus: false,
+            refetchOnWindowFocus: true,
           },
         },
       }),

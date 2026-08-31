@@ -6,13 +6,18 @@ import { WETH_ADDRESS, weth9Abi } from "@/lib/contracts";
 
 /**
  * Balances are read as one multicall rather than three round trips, so the ETH
- * and WETH figures on screen always come from the same block.
+ * and WETH figures on screen always come from the same block. The query polls
+ * every 10 seconds (and refetches when the tab refocuses) so incoming
+ * transfers show up without a manual refresh.
  */
 export function useBalances() {
   const { address } = useAccount();
   const enabled = Boolean(address);
 
-  const eth = useBalance({ address, query: { enabled } });
+  const eth = useBalance({
+    address,
+    query: { enabled, refetchInterval: 10_000 },
+  });
 
   const weth = useReadContracts({
     allowFailure: false,
@@ -26,7 +31,7 @@ export function useBalances() {
       { address: WETH_ADDRESS, abi: weth9Abi, functionName: "decimals" },
       { address: WETH_ADDRESS, abi: weth9Abi, functionName: "symbol" },
     ],
-    query: { enabled },
+    query: { enabled, refetchInterval: 10_000 },
   });
 
   // Depends on the query `refetch` functions, which are referentially stable,

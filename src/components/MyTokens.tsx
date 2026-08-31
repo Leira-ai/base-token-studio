@@ -24,7 +24,7 @@ export function MyTokens() {
 
   const factory = useReadContracts({
     allowFailure: false,
-    query: { enabled: isConnected && Boolean(address) },
+    query: { enabled: isConnected && Boolean(address), refetchInterval: 15_000 },
     contracts: [
       {
         address: TOKEN_FACTORY_ADDRESS!,
@@ -40,7 +40,7 @@ export function MyTokens() {
 
   const meta = useReadContracts({
     allowFailure: true,
-    query: { enabled: tokens.length > 0 },
+    query: { enabled: tokens.length > 0, refetchInterval: 15_000 },
     contracts: tokens.flatMap(
       (token) =>
         [
