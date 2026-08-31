@@ -1,5 +1,5 @@
 import type { Address } from "viem";
-import { parseAmount, type ParsedAmount } from "./format.ts";
+import type { ParsedAmount } from "./format.ts";
 
 /**
  * Set via NEXT_PUBLIC_TOKEN_FACTORY_ADDRESS once the deploy script has run.
@@ -59,17 +59,31 @@ export const factoryAbi = [
  */
 export const MAX_SUPPLY = (2n ** 256n - 1n) / 10n ** 18n;
 
+/**
+ * Returns the supply in WHOLE tokens — the raw number the user typed. The
+ * FactoryToken constructor applies the 10^18 scaling itself
+ * (`_mint(supply_ * 10**decimals())`), so the UI must send 676767, not
+ * 676767 * 10^18; scaling here too would mint 10^18 times more than asked.
+ */
 export function parseSupply(input: string): ParsedAmount {
   if (typeof input !== "string" || input.includes(".")) {
-    return { ok: false, reason: "Whole tokens only — supply has 18 decimals." };
+    return { ok: false, reason: "Whole tokens only — supply is an integer." };
   }
-  const parsed = parseAmount(input, 18);
-  if (!parsed.ok) return parsed;
-  if (parsed.value % 10n ** 18n !== 0n) {
-    return { ok: false, reason: "Whole tokens only — supply has 18 decimals." };
+  const digitsOnly = input.replace(/\s/g, "");
+  if (digitsOnly === "" || !/^\d+$/.test(digitsOnly)) {
+    return { ok: false, reason: "Digits only — supply is an integer." };
   }
-  if (parsed.value / 10n ** 18n > MAX_SUPPLY) {
+  let value: bigint;
+  try {
+    value = BigInt(digitsOnly);
+  } catch {
+    return { ok: false, reason: "Not a valid amount." };
+  }
+  if (value === 0n) {
+    return { ok: false, reason: "Amount must be greater than zero." };
+  }
+  if (value > MAX_SUPPLY) {
     return { ok: false, reason: "Supply is too large." };
   }
-  return parsed;
+  return { ok: true, value };
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useAccount, useReadContracts } from "wagmi";
-import { erc20Abi } from "viem";
+import { erc20Abi, formatUnits } from "viem";
 import { TOKEN_FACTORY_ADDRESS, factoryAbi } from "@/lib/factory";
 import { explorerAddressUrl } from "@/lib/chain";
 import { Card } from "@/components/ui/Card";
@@ -125,10 +125,8 @@ export function MyTokens() {
               <p className="font-mono text-sm tabular-nums">
                 {row.supply !== undefined && row.decimals !== undefined
                   ? new Intl.NumberFormat("en-US", {
-                      maximumFractionDigits: row.decimals,
-                    }).format(
-                      Number(row.supply / 10n ** BigInt(row.decimals)),
-                    )
+                      maximumFractionDigits: 2,
+                    }).format(Number(formatUnits(row.supply, row.decimals)))
                   : "—"}
               </p>
             </li>

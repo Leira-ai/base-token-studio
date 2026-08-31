@@ -7,16 +7,21 @@ test("parseSupply rejects fractional supplies", () => {
   assert.equal(parseSupply("1.").ok, false);
 });
 
-test("parseSupply reuses the shared amount validation", () => {
+test("parseSupply rejects non-numeric input", () => {
   assert.equal(parseSupply("").ok, false);
   assert.equal(parseSupply("abc").ok, false);
   assert.equal(parseSupply("-1").ok, false);
   assert.equal(parseSupply("0").ok, false);
+  assert.equal(parseSupply("0.0").ok, false);
 });
 
-test("parseSupply scales whole tokens to 18 decimals", () => {
+test("parseSupply passes whole tokens through UNSCALED", () => {
+  // The contract applies 10^18 itself; the UI sends the plain integer.
   const result = parseSupply("1000");
-  assert.equal(result.ok && result.value, 1_000_000_000_000_000_000_000n);
+  assert.equal(result.ok && result.value, 1000n);
+
+  const big = parseSupply("676767");
+  assert.equal(big.ok && big.value, 676_767n);
 });
 
 test("parseSupply accepts the maximum representable supply", () => {

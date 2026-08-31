@@ -42,13 +42,13 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
 
   const parsed = parseSupply(supply);
   const supplyError = supply.trim() === "" ? undefined : !parsed.ok ? parsed.reason : undefined;
-  // "676767" mints 676,767 * 10^18 base units — show the explorer-sized number
-  // so the 18-decimal scaling is never a surprise.
+  // Show the explorer-style number so the 18-decimal scaling is never a
+  // surprise: 676767 whole tokens = 676,767 * 10^18 base units on-chain.
   const supplyDigits = supply.trim().replace(/[^0-9]/g, "");
   const supplyPreview =
     supplyDigits === "" || !parsed.ok
       ? undefined
-      : `${groupDigits(supplyDigits)} followed by 18 zeros on-chain`;
+      : `${groupDigits(supplyDigits)} tokens (minted as ${groupDigits(supplyDigits)} × 10¹⁸ base units)`;
 
   const busy = tx.phase === "signing" || tx.phase === "pending";
   const canSubmit =
