@@ -1,0 +1,36 @@
+{
+  "name": "base-token-studio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A Base Sepolia dApp for inspecting balances, wrapping/unwrapping WETH, and sending ERC-20 tokens.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test src/lib/*.test.ts",
+    "verify": "npm run typecheck && npm run lint && npm test && npm run build"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "5.102.8",
+    "next": "16.3.3",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "viem": "2.56.0",
+    "wagmi": "3.7.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "26.4.0",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.3.3",
+    "postcss": "8.5.26",
+    "tailwindcss": "4.3.3",
+    "typescript": "6.0.3"
+  }
+}

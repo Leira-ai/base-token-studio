@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@theme {
+  --color-canvas: #08090d;
+  --color-surface: #10131a;
+  --color-surface-raised: #171b24;
+  --color-border-subtle: #232936;
+  --color-ink: #e8ecf4;
+  --color-ink-muted: #949db2;
+  --color-accent: #4f7cff;
+  --color-accent-ink: #ffffff;
+  --color-positive: #3fca8a;
+  --color-negative: #ff6b6b;
+  --color-caution: #f0b849;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Visible focus is kept for keyboard users only; pointer clicks stay clean. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
