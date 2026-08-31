@@ -14,6 +14,7 @@ import { WrapPanel } from "@/components/WrapPanel";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { TrustPanel } from "@/components/TrustPanel";
 import { ToastStack } from "@/lib/toasts";
+import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 
 /**
@@ -24,7 +25,7 @@ import Link from "next/link";
  */
 export default function Home() {
   const { isConnected } = useAccount();
-  const { eth, weth, refetch, updatedAt } = useBalances();
+  const { eth, weth, refetch, updatedAt, isStale } = useBalances();
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
@@ -59,6 +60,20 @@ export default function Home() {
 
       <div className="space-y-4">
         <NetworkGuard />
+
+        {isStale ? (
+          <div
+            role="alert"
+            className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-caution/40 bg-caution/10 p-4"
+          >
+            <p className="text-sm">
+              The network connection is failing — figures below may be stale.
+            </p>
+            <Button variant="secondary" onClick={refetch}>
+              Retry now
+            </Button>
+          </div>
+        ) : null}
 
         <CreateTokenPanel onConfirmed={refetch} />
 

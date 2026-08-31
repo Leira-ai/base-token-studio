@@ -49,6 +49,10 @@ export function useBalances() {
   // both queries poll together, so the fresher one is the truthful age.
   const updatedAt = Math.max(eth.dataUpdatedAt, weth.dataUpdatedAt);
 
+  // A stalled RPC shows as fetch errors on both queries; surface it so the UI
+  // can say "data may be stale" instead of presenting old numbers as current.
+  const isStale = Boolean(eth.error || weth.error) && updatedAt > 0;
+
   return {
     address,
     eth: {
@@ -67,5 +71,6 @@ export function useBalances() {
     },
     refetch,
     updatedAt,
+    isStale,
   };
 }
