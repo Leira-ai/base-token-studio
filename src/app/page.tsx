@@ -6,6 +6,7 @@ import { useBalances } from "@/hooks/useBalances";
 import { ActivityLog } from "@/components/ActivityLog";
 import { BalancePanel } from "@/components/BalancePanel";
 import { ConnectBar } from "@/components/ConnectBar";
+import { CreateTokenPanel } from "@/components/CreateTokenPanel";
 import { NetworkGuard } from "@/components/NetworkGuard";
 import { TransferPanel } from "@/components/TransferPanel";
 import { WrapPanel } from "@/components/WrapPanel";
@@ -22,7 +23,7 @@ export default function Home() {
             Base Token Studio
           </h1>
           <p className="mt-1 text-sm text-ink-muted">
-            Balances, WETH wrapping, and ERC-20 transfers on{" "}
+            Create tokens, wrap ETH, and send ERC-20 transfers on{" "}
             {targetChain.name}.
           </p>
         </div>
@@ -35,6 +36,7 @@ export default function Home() {
         {isConnected ? (
           <>
             <BalancePanel eth={eth} weth={weth} onRefresh={refetch} />
+            <CreateTokenPanel onConfirmed={refetch} />
             <div className="grid gap-4 md:grid-cols-2">
               <WrapPanel eth={eth} weth={weth} onConfirmed={refetch} />
               <TransferPanel weth={weth} onConfirmed={refetch} />
@@ -48,7 +50,8 @@ export default function Home() {
             </p>
             <p className="mt-2 text-xs text-ink-muted">
               This app only targets {targetChain.name}, so no real funds are at
-              risk.
+              risk. Once connected you can create a token, wrap ETH, and send
+              transfers.
             </p>
           </div>
         )}
