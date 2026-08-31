@@ -45,6 +45,10 @@ export function useBalances() {
 
   const [wethBalance, wethDecimals, wethSymbol] = weth.data ?? [];
 
+  // dataUpdatedAt is TanStack Query's own clock for the last successful fetch;
+  // both queries poll together, so the fresher one is the truthful age.
+  const updatedAt = Math.max(eth.dataUpdatedAt, weth.dataUpdatedAt);
+
   return {
     address,
     eth: {
@@ -62,5 +66,6 @@ export function useBalances() {
       error: weth.error,
     },
     refetch,
+    updatedAt,
   };
 }

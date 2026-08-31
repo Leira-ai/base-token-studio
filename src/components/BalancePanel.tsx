@@ -6,6 +6,7 @@ import { explorerAddressUrl } from "@/lib/chain";
 import { formatBalance, formatFull, truncateHex } from "@/lib/format";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { UpdatedAgo } from "@/components/UpdatedAgo";
 
 type Token = {
   value: bigint | undefined;
@@ -42,17 +43,24 @@ export function BalancePanel({
   eth,
   weth,
   onRefresh,
+  updatedAt,
 }: {
   eth: Token;
   weth: Token;
   onRefresh: () => void;
+  updatedAt: number;
 }) {
   const needsFunds = eth.value === 0n;
 
   return (
     <Card
       title="Balances"
-      description="Read as a single multicall, so both figures come from the same block."
+      description={
+        <>
+          Read as a single multicall, so both figures come from the same block.{" "}
+          <UpdatedAgo at={updatedAt} className="text-ink-muted/80" />
+        </>
+      }
       action={
         <Button variant="ghost" onClick={onRefresh}>
           Refresh

@@ -23,7 +23,7 @@ import { ToastStack } from "@/lib/toasts";
  */
 export default function Home() {
   const { isConnected } = useAccount();
-  const { eth, weth, refetch } = useBalances();
+  const { eth, weth, refetch, updatedAt } = useBalances();
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
@@ -63,7 +63,12 @@ export default function Home() {
 
         {isConnected ? (
           <>
-            <BalancePanel eth={eth} weth={weth} onRefresh={refetch} />
+            <BalancePanel
+              eth={eth}
+              weth={weth}
+              onRefresh={refetch}
+              updatedAt={updatedAt}
+            />
             <MyTokens />
             <div className="grid gap-4 md:grid-cols-2">
               <WrapPanel eth={eth} weth={weth} onConfirmed={refetch} />
