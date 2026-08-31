@@ -3,10 +3,13 @@
 import { useAccount } from "wagmi";
 import { targetChain } from "@/lib/chain";
 import { useBalances } from "@/hooks/useBalances";
+import { useLocale } from "@/lib/useLocale";
+import { t } from "@/lib/i18n";
 import { ActivityLog } from "@/components/ActivityLog";
 import { BalancePanel } from "@/components/BalancePanel";
 import { ConnectBar } from "@/components/ConnectBar";
 import { CreateTokenPanel } from "@/components/CreateTokenPanel";
+import { LocaleToggle } from "@/components/LocaleToggle";
 import { MyTokens } from "@/components/MyTokens";
 import { NetworkGuard } from "@/components/NetworkGuard";
 import { TransferPanel } from "@/components/TransferPanel";
@@ -26,6 +29,7 @@ import Link from "next/link";
 export default function Home() {
   const { isConnected } = useAccount();
   const { eth, weth, refetch, updatedAt, isStale } = useBalances();
+  const { locale } = useLocale();
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
@@ -47,12 +51,12 @@ export default function Home() {
               Base Token Studio
             </h1>
             <p className="mt-1 text-sm text-ink-muted">
-              Create tokens, wrap ETH, and send ERC-20 transfers on{" "}
-              {targetChain.name}.
+              {t(locale, "tagline", { chain: targetChain.name })}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <LocaleToggle />
           <ThemeToggle />
           <ConnectBar />
         </div>
@@ -66,11 +70,9 @@ export default function Home() {
             role="alert"
             className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-caution/40 bg-caution/10 p-4"
           >
-            <p className="text-sm">
-              The network connection is failing — figures below may be stale.
-            </p>
+            <p className="text-sm">{t(locale, "staleBanner")}</p>
             <Button variant="secondary" onClick={refetch}>
-              Retry now
+              {t(locale, "retryNow")}
             </Button>
           </div>
         ) : null}
@@ -84,8 +86,9 @@ export default function Home() {
               weth={weth}
               onRefresh={refetch}
               updatedAt={updatedAt}
+              locale={locale}
             />
-            <MyTokens />
+            <MyTokens locale={locale} />
             <div className="grid gap-4 md:grid-cols-2">
               <WrapPanel eth={eth} weth={weth} onConfirmed={refetch} />
               <TransferPanel weth={weth} onConfirmed={refetch} />
@@ -95,28 +98,19 @@ export default function Home() {
           </>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
-            <CardShell
-              title="Balances"
-              hint="Connect a wallet to read your ETH and WETH balances."
-            />
-            <CardShell
-              title="Wrap and send"
-              hint="Connect a wallet to wrap ETH ↔ WETH and send ERC-20 transfers."
-            />
+            <CardShell title={t(locale, "balances")} hint={t(locale, "balancesHint")} />
+            <CardShell title={t(locale, "wrapSend")} hint={t(locale, "wrapHint")} />
           </div>
         )}
       </div>
 
       <footer className="mt-10 flex flex-wrap items-center justify-between gap-3 text-xs text-ink-muted">
-        <span>
-          Testnet only. Every transaction is signed in your own wallet; this app
-          never holds keys.
-        </span>
+        <span>{t(locale, "footer")}</span>
         <Link
           href="/learn"
           className="text-accent underline decoration-dotted underline-offset-2"
         >
-          New to tokens? Read the 60-second FAQ →
+          {t(locale, "learnCta")}
         </Link>
       </footer>
 

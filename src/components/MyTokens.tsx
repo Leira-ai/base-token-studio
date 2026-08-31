@@ -4,6 +4,8 @@ import { useAccount, useReadContracts } from "wagmi";
 import { erc20Abi, formatUnits } from "viem";
 import { TOKEN_FACTORY_ADDRESS, factoryAbi } from "@/lib/factory";
 import { explorerAddressUrl } from "@/lib/chain";
+import { t } from "@/lib/i18n";
+import type { Locale } from "@/lib/useLocale";
 import { Card } from "@/components/ui/Card";
 
 type TokenRow = {
@@ -19,7 +21,7 @@ type TokenRow = {
  * needs no indexer or subgraph — one multicall fetches the addresses, then one
  * parallel multicall reads each token's ERC-20 metadata.
  */
-export function MyTokens() {
+export function MyTokens({ locale }: { locale: Locale }) {
   const { address, isConnected, chainId } = useAccount();
 
   const factory = useReadContracts({
@@ -70,11 +72,13 @@ export function MyTokens() {
   if (!isConnected) {
     return (
       <Card
-        title="Your tokens"
-        description="Tokens you have deployed through this factory."
+        title={t(locale, "yourTokens")}
+        description={t(locale, "yourTokensDesc")}
       >
         <p className="text-sm text-ink-muted">
-          Connect a wallet to see the tokens you have created.
+          {locale === "id"
+            ? "Hubungkan wallet untuk melihat token yang pernah Anda buat."
+            : "Connect a wallet to see the tokens you have created."}
         </p>
       </Card>
     );
@@ -93,13 +97,14 @@ export function MyTokens() {
 
   return (
     <Card
-      title="Your tokens"
-      description="Tokens you have deployed through this factory."
+      title={t(locale, "yourTokens")}
+      description={t(locale, "yourTokensDesc")}
     >
       {rows.length === 0 ? (
         <p className="text-sm text-ink-muted">
-          None yet — deploy your first token above. It appears here
-          automatically, read straight from the factory on-chain.
+          {locale === "id"
+            ? "Belum ada — deploy token pertama Anda di panel atas. Muncul di sini otomatis, dibaca langsung dari factory on-chain."
+            : "None yet — deploy your first token above. It appears here automatically, read straight from the factory on-chain."}
         </p>
       ) : (
         <ol className="space-y-2">

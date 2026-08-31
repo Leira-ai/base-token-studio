@@ -7,6 +7,8 @@ import { formatBalance, formatFull, truncateHex } from "@/lib/format";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { UpdatedAgo } from "@/components/UpdatedAgo";
+import { t } from "@/lib/i18n";
+import type { Locale } from "@/lib/useLocale";
 
 type Token = {
   value: bigint | undefined;
@@ -44,26 +46,27 @@ export function BalancePanel({
   weth,
   onRefresh,
   updatedAt,
+  locale,
 }: {
   eth: Token;
   weth: Token;
   onRefresh: () => void;
   updatedAt: number;
+  locale: Locale;
 }) {
   const needsFunds = eth.value === 0n;
 
   return (
     <Card
-      title="Balances"
+      title={t(locale, "balances")}
       description={
         <>
-          Read as a single multicall, so both figures come from the same block.{" "}
-          <UpdatedAgo at={updatedAt} className="text-ink-muted/80" />
+          <UpdatedAgo at={updatedAt} locale={locale} />
         </>
       }
       action={
         <Button variant="ghost" onClick={onRefresh}>
-          Refresh
+          {t(locale, "refresh")}
         </Button>
       }
     >

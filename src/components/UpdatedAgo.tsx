@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { t } from "@/lib/i18n";
+import type { Locale } from "@/lib/useLocale";
 
 /**
  * "Updated 12s ago" — surfaces the age of on-chain data instead of presenting
@@ -8,7 +10,15 @@ import { useEffect, useState } from "react";
  * when an RPC stalls, this is the difference between a wrong-looking zero and
  * an obviously stale one.
  */
-export function UpdatedAgo({ at, className = "" }: { at: number; className?: string }) {
+export function UpdatedAgo({
+  at,
+  locale = "en",
+  className = "",
+}: {
+  at: number;
+  locale?: Locale;
+  className?: string;
+}) {
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -19,16 +29,16 @@ export function UpdatedAgo({ at, className = "" }: { at: number; className?: str
   if (!at) return null;
 
   const seconds = Math.max(0, Math.floor((now - at) / 1000));
-  const label =
+  const age =
     seconds < 5
-      ? "just now"
+      ? t(locale, "justNow")
       : seconds < 60
-        ? `${seconds}s ago`
-        : `${Math.floor(seconds / 60)}m ago`;
+        ? t(locale, "secondsAgo", { n: String(seconds) })
+        : t(locale, "minutesAgo", { n: String(Math.floor(seconds / 60)) });
 
   return (
     <span className={`tabular-nums ${className}`} title="Data age">
-      Updated {label}
+      {t(locale, "updated", { age })}
     </span>
   );
 }

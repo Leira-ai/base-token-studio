@@ -8,6 +8,8 @@ import { targetChain, explorerAddressUrl } from "@/lib/chain";
 import { groupDigits } from "@/lib/format";
 import { useTxLifecycle } from "@/hooks/useTxLifecycle";
 import { useGasEstimate } from "@/hooks/useGasEstimate";
+import { t } from "@/lib/i18n";
+import { useLocale } from "@/lib/useLocale";
 import { Button, Spinner } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Field } from "@/components/ui/Field";
@@ -19,6 +21,7 @@ const MAX_SYMBOL_LENGTH = 11;
 
 export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
   const { address, isConnected, chainId } = useAccount();
+  const { locale } = useLocale();
   const [name, setName] = useState("");
   const [symbol, setSymbol] = useState("");
   const [supply, setSupply] = useState("");
@@ -124,13 +127,13 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
 
   return (
     <Card
-      title="Create a token"
-      description="Deploys a fixed-supply ERC-20; the entire supply is minted to you."
+      title={t(locale, "createTitle")}
+      description={t(locale, "createDesc")}
     >
       <div className="space-y-4">
         <Field
           id="token-name"
-          label="Name"
+          label={t(locale, "name")}
           value={name}
           onChange={setName}
           placeholder="Studio Token"
@@ -140,7 +143,7 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
 
         <Field
           id="token-symbol"
-          label="Symbol"
+          label={t(locale, "symbol")}
           value={symbol}
           onChange={(next) => setSymbol(next.toUpperCase())}
           placeholder="STUDIO"
@@ -148,12 +151,12 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
           learn="The short ticker (like ETH or USDC). Letters and digits, 11 characters max."
           disabled={!isConnected || busy}
           error={symbolError}
-          hint={isConnected ? undefined : "Connect a wallet to deploy"}
+          hint={isConnected ? undefined : t(locale, "connectToDeploy")}
         />
 
         <Field
           id="token-supply"
-          label="Total supply (whole tokens)"
+          label={t(locale, "supply")}
           value={supply}
           onChange={setSupply}
           placeholder="1000000"
@@ -172,27 +175,36 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
         onClick={() => void submit()}
       >
         {busy ? <Spinner label="Transaction in progress" /> : null}
-        {isConnected ? "Deploy token" : "Connect a wallet to deploy"}
+        {isConnected ? t(locale, "deployToken") : t(locale, "connectToDeploy")}
       </Button>
 
       {gasEstimate ? (
         <p className="mt-2 text-center text-xs text-ink-muted">{gasEstimate}</p>
       ) : null}
       <p className="mt-2 text-center text-xs text-ink-muted">
-        Platform fee: <strong className="text-positive">0 ETH</strong>, always.
-        You only pay the network fee above.
+        {locale === "id" ? (
+          <>
+            Biaya platform: <strong className="text-positive">0 ETH</strong>,
+            selamanya. Anda hanya membayar biaya jaringan di atas.
+          </>
+        ) : (
+          <>
+            Platform fee: <strong className="text-positive">0 ETH</strong>,
+            always. You only pay the network fee above.
+          </>
+        )}
       </p>
 
       <TxState tx={tx} />
 
       <div className="mt-4 rounded-lg border border-border-subtle bg-surface-raised/60 p-3">
         <p className="text-xs font-medium text-ink-muted">
-          Before you sign — this token, by contract design:
+          {t(locale, "preflight")}
         </p>
         <ul className="mt-1.5 grid gap-1 text-xs text-ink-muted sm:grid-cols-3">
-          <li>✓ Supply fixed forever</li>
-          <li>✓ No mint function</li>
-          <li>✓ No owner, no admin</li>
+          <li>✓ {t(locale, "preflightFixed")}</li>
+          <li>✓ {t(locale, "preflightNoMint")}</li>
+          <li>✓ {t(locale, "preflightNoOwner")}</li>
         </ul>
       </div>
 
