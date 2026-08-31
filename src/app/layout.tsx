@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { cookieToInitialState } from "wagmi";
 import { getConfig } from "@/lib/wagmi";
 import { themeInitScript } from "@/lib/useTheme";
+import { localeInitScript } from "@/lib/useLocale";
 import { Providers } from "@/app/providers";
 import "@/app/globals.css";
 
@@ -29,7 +30,11 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: themeInitScript + localeInitScript,
+          }}
+        />
       </head>
       <body>
         <Providers initialState={initialState}>{children}</Providers>
