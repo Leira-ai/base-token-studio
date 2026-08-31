@@ -6,7 +6,7 @@ import {
   explorerAddressUrl,
   targetChain,
 } from "@/lib/chain";
-import { TOKEN_FACTORY_ADDRESS } from "@/lib/factory";
+import { TOKEN_FACTORY_V2_ADDRESS, factoryV2Abi } from "@/lib/factory";
 import Link from "next/link";
 
 type TokenInfo = {
@@ -14,11 +14,13 @@ type TokenInfo = {
   symbol: string;
   supply: bigint;
   decimals: number;
-  factoryDeploys: boolean;
+  description: string;
+  imageURI: string;
+  burnable: boolean;
 };
 
 async function getToken(address: string): Promise<TokenInfo | null> {
-  if (!isAddress(address) || !TOKEN_FACTORY_ADDRESS) return null;
+  if (!isAddress(address)) return null;
   const config = getConfig();
   try {
     const [name, symbol, supply, decimals] = await Promise.all([
@@ -43,29 +45,23 @@ async function getToken(address: string): Promise<TokenInfo | null> {
         functionName: "decimals",
       }),
     ]);
-    const factory = await readContract(config, {
-      address: TOKEN_FACTORY_ADDRESS,
-      abi: [
-        {
-          type: "function",
-          name: "tokensOf",
-          stateMutability: "view",
-          inputs: [{ name: "creator", type: "address" }],
-          outputs: [{ name: "", type: "address[]" }],
-        },
-      ] as const,
-      functionName: "tokensOf",
+
+    // Metadata only exists for v2-created tokens; v1 tokens simply have none.
+    const info = await readContract(config, {
+      address: TOKEN_FACTORY_V2_ADDRESS,
+      abi: factoryV2Abi,
+      functionName: "tokenInfo",
       args: [address as `0x${string}`],
-      // tokensOf is creator=>tokens, not token lookup; use event-free check:
-      // just report factory membership via staticcall on the token's code size
-    }).catch(() => undefined);
+    }).catch(() => ["", "", false] as const);
 
     return {
       name: String(name),
       symbol: String(symbol),
       supply: supply as bigint,
       decimals: decimals as number,
-      factoryDeploys: Boolean(factory),
+      description: String(info[0] ?? ""),
+      imageURI: String(info[1] ?? ""),
+      burnable: Boolean(info[2]),
     };
   } catch {
     return null;
@@ -142,6 +138,15 @@ export default async function TokenPage({
       ok: true,
     },
     { label: "0% transfer tax", detail: "Plain ERC-20 transfers, nothing skimmed", ok: true },
+    ...(token.burnable
+      ? [
+          {
+            label: "Holders can burn their own tokens",
+            detail: "Opt-in at creation; nobody can burn anyone else's balance",
+            ok: true,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -150,10 +155,27 @@ export default async function TokenPage({
         <p className="text-xs uppercase tracking-wide text-ink-muted">
           Token on {targetChain.name}
         </p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">
-          {token.name}{" "}
-          <span className="text-ink-muted">({token.symbol})</span>
-        </h1>
+        <div className="mt-1 flex items-start gap-3">
+          {token.imageURI ? (
+            // eslint-disable-next-line @next/next/no-img-element -- creator-supplied URL, no loader config
+            <img
+              src={token.imageURI}
+              alt=""
+              width={48}
+              height={48}
+              className="mt-1 size-12 shrink-0 rounded-full border border-border-subtle bg-surface-raised object-cover"
+            />
+          ) : null}
+          <div className="min-w-0">
+            <h1 className="text-2xl font-semibold tracking-tight">
+              {token.name}{" "}
+              <span className="text-ink-muted">({token.symbol})</span>
+            </h1>
+            {token.description ? (
+              <p className="mt-1 text-sm text-ink-muted">{token.description}</p>
+            ) : null}
+          </div>
+        </div>
         <a
           href={explorerAddressUrl(address)}
           target="_blank"
@@ -182,7 +204,7 @@ export default async function TokenPage({
         <p className="mt-4 text-xs text-ink-muted">
           These properties come from the contract this studio deploys —{" "}
           <a
-            href={`https://repo.sourcify.dev/contracts/partial_match/84532/${TOKEN_FACTORY_ADDRESS}`}
+            href={`https://repo.sourcify.dev/contracts/partial_match/84532/${TOKEN_FACTORY_V2_ADDRESS}`}
             target="_blank"
             rel="noreferrer noopener"
             className="text-accent underline decoration-dotted underline-offset-2"

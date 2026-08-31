@@ -2,8 +2,15 @@
 
 import { useState } from "react";
 import { encodeFunctionData } from "viem";
-import { useAccount, useWriteContract } from "wagmi";
-import { TOKEN_FACTORY_ADDRESS, factoryAbi, parseSupply } from "@/lib/factory";
+import { useAccount, useConfig, useWriteContract } from "wagmi";
+import { readContract } from "wagmi/actions";
+import {
+  MAX_DESCRIPTION_LENGTH,
+  MAX_IMAGE_URI_LENGTH,
+  TOKEN_FACTORY_V2_ADDRESS,
+  factoryV2Abi,
+  parseSupply,
+} from "@/lib/factory";
 import { targetChain, explorerAddressUrl } from "@/lib/chain";
 import { groupDigits } from "@/lib/format";
 import { useTxLifecycle } from "@/hooks/useTxLifecycle";
@@ -26,15 +33,19 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
   const [name, setName] = useState("");
   const [symbol, setSymbol] = useState("");
   const [supply, setSupply] = useState("");
+  const [description, setDescription] = useState("");
+  const [imageURI, setImageURI] = useState("");
+  const [burnable, setBurnable] = useState(false);
   const [created, setCreated] = useState<{
     name: string;
     symbol: string;
     address: string;
   } | undefined>(undefined);
   const { mutateAsync: writeContract } = useWriteContract();
+  const config = useConfig();
   const tx = useTxLifecycle("Create token");
 
-  const deployed = TOKEN_FACTORY_ADDRESS !== undefined;
+  const deployed = true; // V2 factory address is a compile-time constant.
   const onRightChain = chainId === targetChain.id;
 
   const trimmedName = name.trim();
@@ -58,6 +69,19 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
       ? undefined
       : `${groupDigits(supplyDigits)} tokens (minted as ${groupDigits(supplyDigits)} × 10¹⁸ base units)`;
 
+  const trimmedDescription = description.trim();
+  const trimmedImageURI = imageURI.trim();
+  const descriptionError =
+    trimmedDescription.length > MAX_DESCRIPTION_LENGTH
+      ? `At most ${MAX_DESCRIPTION_LENGTH} characters.`
+      : undefined;
+  const imageError =
+    trimmedImageURI.length > MAX_IMAGE_URI_LENGTH
+      ? `At most ${MAX_IMAGE_URI_LENGTH} characters.`
+      : trimmedImageURI !== "" && !/^(https?|ipfs):\/\//.test(trimmedImageURI)
+        ? "Use an https:// or ipfs:// URL."
+        : undefined;
+
   const busy = tx.phase === "signing" || tx.phase === "pending";
   const canSubmit =
     isConnected &&
@@ -65,17 +89,30 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
     deployed &&
     trimmedSymbol.length > 0 &&
     symbolError === undefined &&
+    descriptionError === undefined &&
+    imageError === undefined &&
     parsed.ok &&
     !busy;
 
   const gasEstimate = useGasEstimate(
-    parsed.ok && trimmedSymbol.length > 0 && symbolError === undefined && deployed
+    parsed.ok &&
+      trimmedSymbol.length > 0 &&
+      symbolError === undefined &&
+      descriptionError === undefined &&
+      imageError === undefined
       ? {
-          to: TOKEN_FACTORY_ADDRESS!,
+          to: TOKEN_FACTORY_V2_ADDRESS,
           data: encodeFunctionData({
-            abi: factoryAbi,
+            abi: factoryV2Abi,
             functionName: "createToken",
-            args: [trimmedName, trimmedSymbol, parsed.value],
+            args: [
+              trimmedName,
+              trimmedSymbol,
+              parsed.value,
+              burnable,
+              trimmedDescription,
+              trimmedImageURI,
+            ],
           }),
         }
       : undefined,
@@ -84,46 +121,53 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
 
   async function submit() {
     if (!parsed.ok || !address) return;
-    // The factory returns the new token address from createToken; capture it
-    // for the share card before the form resets.
-    let tokenAddress: string | undefined;
-    const confirmed = await tx.run(async () => {
-      const hash = await writeContract({
-        address: TOKEN_FACTORY_ADDRESS!,
-        abi: factoryAbi,
+    const confirmed = await tx.run(() =>
+      writeContract({
+        address: TOKEN_FACTORY_V2_ADDRESS,
+        abi: factoryV2Abi,
         functionName: "createToken",
-        args: [trimmedName, trimmedSymbol, parsed.value],
-      });
-      return hash;
-    });
+        args: [
+          trimmedName,
+          trimmedSymbol,
+          parsed.value,
+          burnable,
+          trimmedDescription,
+          trimmedImageURI,
+        ],
+      }),
+    );
 
     if (confirmed) {
+      // createToken's return value is not available from a write receipt, so
+      // read the creator's token list and take the newest entry — the factory
+      // appends in order.
+      let tokenAddress = address;
+      try {
+        const tokens = await readContract(config, {
+          address: TOKEN_FACTORY_V2_ADDRESS,
+          abi: factoryV2Abi,
+          functionName: "tokensOf",
+          args: [address],
+        });
+        const newest = tokens[tokens.length - 1];
+        if (newest) tokenAddress = newest;
+      } catch {
+        // Fall back to the creator address; the toast already links the tx.
+      }
+
       setCreated({
         name: trimmedName === "" ? trimmedSymbol : trimmedName,
         symbol: trimmedSymbol,
-        address: tokenAddress ?? address,
+        address: tokenAddress,
       });
       setName("");
       setSymbol("");
       setSupply("");
+      setDescription("");
+      setImageURI("");
+      setBurnable(false);
       onConfirmed();
     }
-  }
-
-  if (!deployed) {
-    return (
-      <Card
-        title="Create a token"
-        description="Deploy your own fixed-supply ERC-20 through the studio's TokenFactory."
-      >
-        <p className="text-sm text-ink-muted">
-          The factory contract is not deployed yet. Set{" "}
-          <code className="font-mono text-xs">NEXT_PUBLIC_TOKEN_FACTORY_ADDRESS</code>{" "}
-          after running the Foundry deploy script in{" "}
-          <code className="font-mono text-xs">contracts/</code>.
-        </p>
-      </Card>
-    );
   }
 
   return (
@@ -168,6 +212,56 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
           error={supplyError}
           hint={supplyPreview}
         />
+
+        <Field
+          id="token-description"
+          label={locale === "id" ? "Deskripsi (opsional)" : "Description (optional)"}
+          value={description}
+          onChange={setDescription}
+          placeholder={
+            locale === "id"
+              ? "Token komunitas untuk…"
+              : "A community token for…"
+          }
+          learn="Stored on-chain in the factory and shown on your token's public page."
+          disabled={!isConnected || busy}
+          error={descriptionError}
+          hint={`${trimmedDescription.length}/${MAX_DESCRIPTION_LENGTH}`}
+        />
+
+        <Field
+          id="token-image"
+          label={locale === "id" ? "URL logo (opsional)" : "Logo URL (optional)"}
+          value={imageURI}
+          onChange={setImageURI}
+          placeholder="https://… or ipfs://…"
+          mono
+          learn="A link to your token's image. IPFS is recommended so the logo outlives any single host."
+          disabled={!isConnected || busy}
+          error={imageError}
+        />
+
+        <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-border-subtle bg-surface-raised/60 p-3">
+          <input
+            type="checkbox"
+            checked={burnable}
+            onChange={(event) => setBurnable(event.target.checked)}
+            disabled={!isConnected || busy}
+            className="mt-0.5 size-4 accent-[var(--color-accent)]"
+          />
+          <span className="text-xs">
+            <span className="font-medium">
+              {locale === "id"
+                ? "Izinkan holder membakar token miliknya"
+                : "Let holders burn their own tokens"}
+            </span>
+            <span className="mt-0.5 block text-ink-muted">
+              {locale === "id"
+                ? "Holder bisa menghancurkan saldo miliknya sendiri secara permanen. Tidak ada yang bisa membakar token orang lain, dan supply tetap tidak bisa ditambah."
+                : "Holders can permanently destroy their own balance. Nobody can burn anyone else's tokens, and supply still can never increase."}
+            </span>
+          </span>
+        </label>
       </div>
 
       <Button

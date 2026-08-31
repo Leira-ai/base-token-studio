@@ -9,6 +9,10 @@ import type { ParsedAmount } from "./format.ts";
 export const TOKEN_FACTORY_ADDRESS: Address | undefined = process.env
   .NEXT_PUBLIC_TOKEN_FACTORY_ADDRESS as Address | undefined;
 
+/** V2 factory adds burnable + on-chain metadata. Deployed 2026-08-31, Sourcify-verified. */
+export const TOKEN_FACTORY_V2_ADDRESS: Address =
+  "0xc9bF3F956E276767Aa32654f9A730864505aB4f0";
+
 /**
  * Hand-written minimal ABI matching contracts/src/TokenFactory.sol. Kept in
  * sync manually because the frontend only needs these three entries plus the
@@ -52,6 +56,55 @@ export const factoryAbi = [
     ],
   },
 ] as const;
+
+/**
+ * V2 ABI: createToken gains `burnable` plus on-chain description/imageURI, and
+ * `tokenInfo(token)` reads that metadata back for the token page.
+ */
+export const factoryV2Abi = [
+  {
+    type: "function",
+    name: "createToken",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "name", type: "string" },
+      { name: "symbol", type: "string" },
+      { name: "supply", type: "uint256" },
+      { name: "burnable", type: "bool" },
+      { name: "description", type: "string" },
+      { name: "imageURI", type: "string" },
+    ],
+    outputs: [{ name: "token", type: "address" }],
+  },
+  {
+    type: "function",
+    name: "tokenInfo",
+    stateMutability: "view",
+    inputs: [{ name: "", type: "address" }],
+    outputs: [
+      { name: "description", type: "string" },
+      { name: "imageURI", type: "string" },
+      { name: "burnable", type: "bool" },
+    ],
+  },
+  {
+    type: "function",
+    name: "tokensOf",
+    stateMutability: "view",
+    inputs: [{ name: "creator", type: "address" }],
+    outputs: [{ name: "", type: "address[]" }],
+  },
+  {
+    type: "function",
+    name: "tokenCountOf",
+    stateMutability: "view",
+    inputs: [{ name: "creator", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+] as const;
+
+export const MAX_DESCRIPTION_LENGTH = 280;
+export const MAX_IMAGE_URI_LENGTH = 200;
 
 /**
  * The token mints `supply * 10**18`, so a UI-entered supply above this would

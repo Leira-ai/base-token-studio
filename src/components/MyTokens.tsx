@@ -2,7 +2,7 @@
 
 import { useAccount, useReadContracts } from "wagmi";
 import { erc20Abi, formatUnits } from "viem";
-import { TOKEN_FACTORY_ADDRESS, factoryAbi } from "@/lib/factory";
+import { TOKEN_FACTORY_V2_ADDRESS, factoryV2Abi } from "@/lib/factory";
 import { explorerAddressUrl } from "@/lib/chain";
 import { t } from "@/lib/i18n";
 import type { Locale } from "@/lib/useLocale";
@@ -30,8 +30,8 @@ export function MyTokens({ locale }: { locale: Locale }) {
     query: { enabled: isConnected && Boolean(address), refetchInterval: 15_000 },
     contracts: [
       {
-        address: TOKEN_FACTORY_ADDRESS!,
-        abi: factoryAbi,
+        address: TOKEN_FACTORY_V2_ADDRESS,
+        abi: factoryV2Abi,
         functionName: "tokensOf",
         args: address ? [address] : undefined,
       },
