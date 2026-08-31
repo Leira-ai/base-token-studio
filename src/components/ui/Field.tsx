@@ -42,7 +42,7 @@ export function Field({
       </div>
 
       <div
-        className={`flex items-center gap-2 rounded-lg border bg-surface-raised px-3 ${
+        className={`flex items-center gap-2 rounded-lg border bg-surface-raised px-3 transition-colors focus-within:border-accent/70 ${
           error ? "border-negative" : "border-border-subtle"
         }`}
       >
@@ -57,7 +57,7 @@ export function Field({
           spellCheck={false}
           aria-invalid={Boolean(error)}
           aria-describedby={describedBy}
-          className={`w-full bg-transparent py-2.5 text-sm outline-none placeholder:text-ink-muted/60 disabled:cursor-not-allowed ${
+          className={`w-full bg-transparent py-2.5 text-sm outline-none focus:outline-none focus:ring-0 placeholder:text-ink-muted/60 disabled:cursor-not-allowed ${
             mono ? "font-mono" : ""
           }`}
         />

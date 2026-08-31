@@ -7,6 +7,7 @@ import { ActivityLog } from "@/components/ActivityLog";
 import { BalancePanel } from "@/components/BalancePanel";
 import { ConnectBar } from "@/components/ConnectBar";
 import { CreateTokenPanel } from "@/components/CreateTokenPanel";
+import { MyTokens } from "@/components/MyTokens";
 import { NetworkGuard } from "@/components/NetworkGuard";
 import { TransferPanel } from "@/components/TransferPanel";
 import { WrapPanel } from "@/components/WrapPanel";
@@ -58,6 +59,7 @@ export default function Home() {
         {isConnected ? (
           <>
             <BalancePanel eth={eth} weth={weth} onRefresh={refetch} />
+            <MyTokens />
             <div className="grid gap-4 md:grid-cols-2">
               <WrapPanel eth={eth} weth={weth} onConfirmed={refetch} />
               <TransferPanel weth={weth} onConfirmed={refetch} />
