@@ -10,6 +10,7 @@ import { useTxLifecycle } from "@/hooks/useTxLifecycle";
 import { useGasEstimate } from "@/hooks/useGasEstimate";
 import { t } from "@/lib/i18n";
 import { useLocale } from "@/lib/useLocale";
+import type { Locale } from "@/lib/useLocale";
 import { Button, Spinner } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Field } from "@/components/ui/Field";
@@ -213,6 +214,7 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
           name={created.name}
           symbol={created.symbol}
           address={created.address}
+          locale={locale}
         />
       ) : null}
     </Card>
@@ -228,10 +230,12 @@ function SuccessCard({
   name,
   symbol,
   address,
+  locale,
 }: {
   name: string;
   symbol: string;
   address: string;
+  locale: Locale;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -245,13 +249,16 @@ function SuccessCard({
     }
   }
 
+  const liveMessage =
+    locale === "id" ? "sudah live!" : "is live!";
+
   return (
     <div
       role="status"
       className="rise-in mt-4 rounded-xl border border-positive/40 bg-positive/10 p-4"
     >
       <p className="text-sm font-semibold text-positive">
-        {name} ({symbol}) is live!
+        {name} ({symbol}) {liveMessage}
       </p>
       <div className="mt-2 flex items-center justify-between gap-2">
         <a
@@ -270,9 +277,44 @@ function SuccessCard({
           {copied ? "Copied ✓" : "Copy address"}
         </button>
       </div>
+      <div className="mt-3 border-t border-border-subtle pt-3">
+        <p className="text-xs font-medium text-ink-muted">
+          {locale === "id" ? "Langkah selanjutnya:" : "What's next:"}
+        </p>
+        <ol className="mt-1.5 space-y-1 text-xs text-ink-muted">
+          <li>
+            1.{" "}
+            <a
+              href={`https://sepolia.basescan.org/address/${address}#code`}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="text-accent underline decoration-dotted underline-offset-2"
+            >
+              {locale === "id" ? "Cek kontrak di Basescan" : "Check the contract on Basescan"}
+            </a>{" "}
+            —{" "}
+            {locale === "id"
+              ? "pastikan source-nya terbuka sebelum membagikan."
+              : "confirm the source is open before you share it."}
+          </li>
+          <li>
+            2.{" "}
+            {locale === "id"
+              ? "Ingin token diperdagangkan? Tambahkan pool di Uniswap (Base Sepolia) memakai alamat token di atas."
+              : "Want it tradable? Create a Uniswap pool on Base Sepolia using the token address above."}
+          </li>
+          <li>
+            3.{" "}
+            {locale === "id"
+              ? "Bagikan halaman token + alamat kontrak ke komunitas Anda."
+              : "Share the token page + contract address with your community."}
+          </li>
+        </ol>
+      </div>
       <p className="mt-2 text-xs text-ink-muted">
-        The whole supply is in your wallet. Screenshot this card to share it —
-        the address links straight to the verified contract.
+        {locale === "id"
+          ? "Seluruh supply sudah ada di wallet Anda."
+          : "The whole supply is in your wallet."}
       </p>
     </div>
   );

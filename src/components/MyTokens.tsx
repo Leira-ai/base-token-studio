@@ -7,6 +7,7 @@ import { explorerAddressUrl } from "@/lib/chain";
 import { t } from "@/lib/i18n";
 import type { Locale } from "@/lib/useLocale";
 import { Card } from "@/components/ui/Card";
+import Link from "next/link";
 
 type TokenRow = {
   address: string;
@@ -115,17 +116,30 @@ export function MyTokens({ locale }: { locale: Locale }) {
             >
               <div className="min-w-0">
                 <p className="text-sm font-medium">
-                  {row.name ?? "Unknown"}{" "}
+                  <Link
+                    href={`/token/${row.address}`}
+                    className="hover:text-accent hover:underline"
+                  >
+                    {row.name ?? "Unknown"}
+                  </Link>{" "}
                   <span className="text-ink-muted">· {row.symbol ?? "?"}</span>
                 </p>
-                <a
-                  href={explorerAddressUrl(row.address)}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="font-mono text-xs text-ink-muted underline decoration-dotted underline-offset-2 hover:text-ink"
-                >
-                  {row.address}
-                </a>
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                  <a
+                    href={explorerAddressUrl(row.address)}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="font-mono text-xs text-ink-muted underline decoration-dotted underline-offset-2 hover:text-ink"
+                  >
+                    {row.address}
+                  </a>
+                  <span
+                    className="text-[10px] text-positive"
+                    title="Tokens from this factory have fixed supply, no mint function, no owner, and no transfer tax."
+                  >
+                    ✓ {locale === "id" ? "aman by design" : "safe by design"}
+                  </span>
+                </div>
               </div>
               <p className="font-mono text-sm tabular-nums">
                 {row.supply !== undefined && row.decimals !== undefined
