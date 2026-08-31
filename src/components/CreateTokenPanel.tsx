@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { encodeFunctionData } from "viem";
 import { useAccount, useWriteContract } from "wagmi";
 import { TOKEN_FACTORY_ADDRESS, factoryAbi, parseSupply } from "@/lib/factory";
 import { targetChain, explorerAddressUrl } from "@/lib/chain";
 import { groupDigits } from "@/lib/format";
 import { useTxLifecycle } from "@/hooks/useTxLifecycle";
+import { useGasEstimate } from "@/hooks/useGasEstimate";
 import { Button, Spinner } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Field } from "@/components/ui/Field";
@@ -57,6 +59,20 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
     symbolError === undefined &&
     parsed.ok &&
     !busy;
+
+  const gasEstimate = useGasEstimate(
+    parsed.ok && trimmedSymbol.length > 0 && symbolError === undefined && deployed
+      ? {
+          to: TOKEN_FACTORY_ADDRESS!,
+          data: encodeFunctionData({
+            abi: factoryAbi,
+            functionName: "createToken",
+            args: [trimmedName, trimmedSymbol, parsed.value],
+          }),
+        }
+      : undefined,
+    isConnected && !busy,
+  );
 
   async function submit() {
     if (!parsed.ok || !address) return;
@@ -143,6 +159,10 @@ export function CreateTokenPanel({ onConfirmed }: { onConfirmed: () => void }) {
         {busy ? <Spinner label="Transaction in progress" /> : null}
         {isConnected ? "Deploy token" : "Connect a wallet to deploy"}
       </Button>
+
+      {gasEstimate ? (
+        <p className="mt-2 text-center text-xs text-ink-muted">{gasEstimate}</p>
+      ) : null}
 
       <TxState tx={tx} />
 
